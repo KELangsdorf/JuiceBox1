@@ -1,5 +1,6 @@
 const express = require('express');
 const usersRouter = express.Router();
+require('dotenv').config();
 
 const { 
   createUser,
@@ -8,7 +9,7 @@ const {
 } = require('../db');
 
 const jwt = require('jsonwebtoken');
-
+//get all works
 usersRouter.get('/', async (req, res, next) => {
   try {
     const users = await getAllUsers();
@@ -20,7 +21,7 @@ usersRouter.get('/', async (req, res, next) => {
     next({ name, message });
   }
 });
-
+//login returns an empty object
 usersRouter.post('/login', async (req, res, next) => {
   const { username, password } = req.body;
 
@@ -38,17 +39,17 @@ usersRouter.post('/login', async (req, res, next) => {
     if (user && user.password == password) {
       const token = jwt.sign({ 
         id: user.id, 
-        username
-      }, process.env.JWT_SECRET, {
+        username: user.username
+      }, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: '1w'
       });
 
-      res.send({ 
+      res.json({ 
         message: "you're logged in!",
         token 
       });
     } else {
-      next({ 
+      return next({ 
         name: 'IncorrectCredentialsError', 
         message: 'Username or password is incorrect'
       });
@@ -82,7 +83,7 @@ usersRouter.post('/register', async (req, res, next) => {
     const token = jwt.sign({ 
       id: user.id, 
       username
-    }, process.env.JWT_SECRET, {
+    }, process.env.ACCESS_TOKEN_SECRET, {
       expiresIn: '1w'
     });
 

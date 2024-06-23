@@ -93,6 +93,12 @@ async function createInitialUsers() {
       name: 'Joshua',
       location: 'Upper East Side'
     });
+    await createUser({ 
+      username: 'testboy',
+      password: 'coolguy',
+      name: 'Tested',
+      location: 'Hell'
+    });
     
     console.log("Finished creating users!");
   } catch (error) {
