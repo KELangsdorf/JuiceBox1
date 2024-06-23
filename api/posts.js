@@ -92,35 +92,37 @@ postsRouter.patch("/:postId", requireUser, async (req, res, next) => {
     next({ name, message });
   }
 });
-postsRouter.delete("/:postId", requireUser, async (req, res, next) => {
-  try {
-    const { postId } = req.params;
-    const postToDelete = await getPostById(postId);
-    if (!postToDelete) {
-      return res
-        .status(404)
-        .json({ success: false, message: `Post not found with ID ${postId}` });
-    }
-    if (req.user.id !== postToDelete.author.id) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "You are not authorized to delete this post.",
-        });
-    }
-    const deletedPost = await updatePost(postId, { active: false });
-    if (!deletedPost) {
-      return next({
-        name: "DeleteError",
-        message: "Failed to delete the post.",
-      });
-    }
-    res.json({ success: true, deletedPost });
-  } catch (error) {
-    next(error);
-  }
-});
 
+
+postsRouter.delete('/:postId', requireUser, async (req, res, next) => {
+try {
+  const { postId } = req.params;
+  const posttoUpdate = await getPostById(postId);
+  if (!posttoUpdate) {
+    return res
+      .status(404)
+      .json({ success: false, message: `Post not found with ID ${postId}` }); 
+  }
+  if (req.user.id !== posttoUpdate.author.id){
+   return res
+   .status(403)
+   .json({
+      success: false,
+      message:
+        "You must be the same user who created this post to perform this action",
+    });
+  } 
+    const deletedPost = await updatePost(postId , { active: false });
+    if (!deletedPost){
+    return next ({
+     name: "Error Deleting",
+     message: "Failed Attempt to Delete Post"
+     })
+}
+res.json({ success: true, deletedPost });
+} catch (error) {
+next(error);
+}
+});
 
 module.exports = postsRouter;
