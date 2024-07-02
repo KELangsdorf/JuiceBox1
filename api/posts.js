@@ -3,7 +3,7 @@ const postsRouter = express.Router();
 
 const { requireUser } = require("./utils");
 
-const { createPost, getAllPosts, updatePost, getPostById } = require("../db");
+const { createPost, getAllPosts, updatePost, getPostById, deletePost  } = require("../db");
 
 postsRouter.get("/", async (req, res, next) => {
   try {
@@ -94,35 +94,19 @@ postsRouter.patch("/:postId", requireUser, async (req, res, next) => {
 });
 
 
-postsRouter.delete('/:postId', requireUser, async (req, res, next) => {
-try {
-  const { postId } = req.params;
-  const posttoUpdate = await getPostById(postId);
-  if (!posttoUpdate) {
-    return res
-      .status(404)
-      .json({ success: false, message: `Post not found with ID ${postId}` }); 
-  }
-  if (req.user.id !== posttoUpdate.author.id){
-   return res
-   .status(403)
-   .json({
-      success: false,
-      message:
-        "You must be the same user who created this post to perform this action",
-    });
-  } 
-    const deletedPost = await updatePost(postId , { active: false });
-    if (!deletedPost){
-    return next ({
-     name: "Error Deleting",
-     message: "Failed Attempt to Delete Post"
-     })
-}
-res.json({ success: true, deletedPost });
-} catch (error) {
-next(error);
-}
-});
+postsRouter.delete('/:postId', async (req, res, next) => {
+  const postId = req.params.postId;
 
+  try {
+    const deletedPost = await deletePost(postId);
+
+    res.json({
+      success: true,
+      deletedPost
+    });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    next(error);
+  }
+});
 module.exports = postsRouter;

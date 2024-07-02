@@ -295,7 +295,24 @@ async function getPostsByUser(userId) {
     throw error;
   }
 }
+async function deletePost(postId) {
+  try {
+    const result = await client.query(`
+      DELETE FROM posts
+      WHERE id = $1
+      RETURNING *;
+    `, [postId]);
 
+    if (result.rows.length === 0) {
+      throw new Error(`Post with id ${postId} not found.`);
+    }
+
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    throw error;
+  }
+}
 async function getPostsByTagName(tagName) {
   try {
     const { rows: postIds } = await client.query(
@@ -418,4 +435,5 @@ module.exports = {
   getAllTags,
   createPostTag,
   addTagsToPost,
+  deletePost
 };
